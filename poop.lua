@@ -73,7 +73,7 @@ local textBox = Instance.new("TextBox")
 textBox.Parent = frame
 textBox.Size = UDim2.new(1, -30, 0, 40)
 textBox.Position = UDim2.new(0, 15, 0, 50)
-textBox.PlaceholderText = "Enter player name..."
+textBox.PlaceholderText = "Enter player name (Can be shortened)"
 textBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 textBox.TextColor3 = Color3.new(1, 1, 1)
 textBox.Font = Enum.Font.Gotham
@@ -104,18 +104,40 @@ teleportButton.MouseLeave:Connect(function()
 	TweenService:Create(teleportButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(65, 105, 225)}):Play()
 end)
 
+local function findClosestPlayerName(inputName)
+	local closestPlayer
+	local closestDistance = math.huge
+	inputName = inputName:lower()
+	for _, player in ipairs(Players:GetPlayers()) do
+		local name = player.Name:lower()
+		if name:sub(1, #inputName) == inputName then
+			closestPlayer = player
+			break
+		else
+			local distance = math.abs(#name - #inputName)
+			if distance < closestDistance then
+				closestDistance = distance
+				closestPlayer = player
+			end
+		end
+	end
+	return closestPlayer
+end
+
 teleportButton.MouseButton1Click:Connect(function()
 	local targetName = textBox.Text
-	local targetPlayer = Players:FindFirstChild(targetName)
-	if targetPlayer and targetPlayer.Character and LocalPlayer.Character and
-	   targetPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-		LocalPlayer.Character:MoveTo(targetPlayer.Character.HumanoidRootPart.Position + Vector3.new(2,0,0))
-		teleportButton.Text = "Teleported!"
-	else
-		teleportButton.Text = "Teleport failed!"
+	if targetName ~= "" then
+		local targetPlayer = findClosestPlayerName(targetName)
+		if targetPlayer and targetPlayer.Character and LocalPlayer.Character and
+		   targetPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+			LocalPlayer.Character:MoveTo(targetPlayer.Character.HumanoidRootPart.Position + Vector3.new(2,0,0))
+			teleportButton.Text = "Teleported!"
+		else
+			teleportButton.Text = "Teleport failed!"
+		end
+		task.wait(1)
+		teleportButton.Text = "Teleport to Player"
 	end
-	task.wait(1)
-	teleportButton.Text = "Teleport to Player"
 end)
 
 local dragging, dragStart, startPos
