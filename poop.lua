@@ -1,7 +1,6 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -15,8 +14,8 @@ screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 screenGui.Parent = PlayerGui
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 320, 0, 320)
-frame.Position = UDim2.new(0.5, -160, 0.5, -160)
+frame.Size = UDim2.new(0, 320, 0, 330)
+frame.Position = UDim2.new(0.5, -160, 0.5, -165)
 frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 frame.BorderSizePixel = 0
 frame.Active = true
@@ -49,13 +48,6 @@ closeButton.TextSize = 18
 closeButton.TextColor3 = Color3.fromRGB(255, 100, 100)
 closeButton.BackgroundTransparency = 1
 closeButton.ZIndex = 10
-
-closeButton.MouseEnter:Connect(function()
-	closeButton.TextColor3 = Color3.fromRGB(255, 150, 150)
-end)
-closeButton.MouseLeave:Connect(function()
-	closeButton.TextColor3 = Color3.fromRGB(255, 100, 100)
-end)
 closeButton.MouseButton1Click:Connect(function()
 	frame.Visible = false
 end)
@@ -65,12 +57,13 @@ textBox.Parent = frame
 textBox.Size = UDim2.new(1, -30, 0, 35)
 textBox.Position = UDim2.new(0, 15, 0, 40)
 textBox.PlaceholderText = "Enter player name..."
+textBox.Text = ""
+textBox.ClearTextOnFocus = false
 textBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 textBox.TextColor3 = Color3.new(1, 1, 1)
 textBox.Font = Enum.Font.Gotham
 textBox.TextSize = 16
 textBox.ZIndex = 10
-
 local tbCorner = Instance.new("UICorner")
 tbCorner.CornerRadius = UDim.new(0, 8)
 tbCorner.Parent = textBox
@@ -85,17 +78,23 @@ teleportButton.TextColor3 = Color3.new(1, 1, 1)
 teleportButton.Font = Enum.Font.GothamBold
 teleportButton.TextSize = 16
 teleportButton.ZIndex = 10
+local teleportCorner = Instance.new("UICorner")
+teleportCorner.CornerRadius = UDim.new(0, 8)
+teleportCorner.Parent = teleportButton
 
-local teleportAllButton = Instance.new("TextButton")
-teleportAllButton.Parent = frame
-teleportAllButton.Size = UDim2.new(0.5, -20, 0, 35)
-teleportAllButton.Position = UDim2.new(0.5, 5, 0, 85)
-teleportAllButton.Text = "Teleport All"
-teleportAllButton.BackgroundColor3 = Color3.fromRGB(220, 80, 80)
-teleportAllButton.TextColor3 = Color3.new(1, 1, 1)
-teleportAllButton.Font = Enum.Font.GothamBold
-teleportAllButton.TextSize = 16
-teleportAllButton.ZIndex = 10
+local bringAllButton = Instance.new("TextButton")
+bringAllButton.Parent = frame
+bringAllButton.Size = UDim2.new(0.5, -20, 0, 35)
+bringAllButton.Position = UDim2.new(0.5, 5, 0, 85)
+bringAllButton.Text = "Bring All"
+bringAllButton.BackgroundColor3 = Color3.fromRGB(220, 80, 80)
+bringAllButton.TextColor3 = Color3.new(1, 1, 1)
+bringAllButton.Font = Enum.Font.GothamBold
+bringAllButton.TextSize = 16
+bringAllButton.ZIndex = 10
+local bringAllCorner = Instance.new("UICorner")
+bringAllCorner.CornerRadius = UDim.new(0, 8)
+bringAllCorner.Parent = bringAllButton
 
 local listFrame = Instance.new("ScrollingFrame")
 listFrame.Parent = frame
@@ -106,7 +105,6 @@ listFrame.ScrollBarThickness = 6
 listFrame.BorderSizePixel = 0
 listFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 listFrame.ZIndex = 10
-
 local listCorner = Instance.new("UICorner")
 listCorner.CornerRadius = UDim.new(0, 8)
 listCorner.Parent = listFrame
@@ -141,6 +139,60 @@ local function teleportToPlayer(targetPlayer)
 	end
 end
 
+local function bringPlayer(targetPlayer)
+    if targetPlayer and character:FindFirstChild("HumanoidRootPart") then
+    targetPlayer.CFrame = character.HumanoidRootPart.CFrame
+    end
+
+local activeOptionBox
+local function showPlayerOptions(button, player)
+	if activeOptionBox then activeOptionBox:Destroy() end
+	local optionBox = Instance.new("Frame")
+	optionBox.Size = UDim2.new(1, 0, 0, 35)
+	optionBox.Position = UDim2.new(0, 0, 0, button.AbsolutePosition.Y - listFrame.AbsolutePosition.Y + 30)
+	optionBox.BackgroundTransparency = 1
+	optionBox.ZIndex = 20
+	optionBox.Parent = listFrame
+	activeOptionBox = optionBox
+
+	local tpBtn = Instance.new("TextButton")
+	tpBtn.Parent = optionBox
+	tpBtn.Size = UDim2.new(0.5, -5, 1, 0)
+	tpBtn.Position = UDim2.new(0, 0, 0, 0)
+	tpBtn.BackgroundColor3 = Color3.fromRGB(60, 180, 100)
+	tpBtn.TextColor3 = Color3.new(1,1,1)
+	tpBtn.Font = Enum.Font.GothamBold
+	tpBtn.TextSize = 16
+	tpBtn.Text = "Teleport"
+	local tpc = Instance.new("UICorner")
+	tpc.CornerRadius = UDim.new(0, 6)
+	tpc.Parent = tpBtn
+
+	local bringBtn = Instance.new("TextButton")
+	bringBtn.Parent = optionBox
+	bringBtn.Size = UDim2.new(0.5, -5, 1, 0)
+	bringBtn.Position = UDim2.new(0.5, 10, 0, 0)
+	bringBtn.BackgroundColor3 = Color3.fromRGB(140, 80, 200)
+	bringBtn.TextColor3 = Color3.new(1,1,1)
+	bringBtn.Font = Enum.Font.GothamBold
+	bringBtn.TextSize = 16
+	bringBtn.Text = "Bring"
+	local cc = Instance.new("UICorner")
+	cc.CornerRadius = UDim.new(0, 6)
+	cc.Parent = bringBtn
+
+	tpBtn.MouseButton1Click:Connect(function()
+		teleportToPlayer(player)
+		optionBox:Destroy()
+		activeOptionBox = nil
+	end)
+	bringBtn.MouseButton1Click:Connect(function()
+		bringPlayer(player)
+		optionBox:Destroy()
+		activeOptionBox = nil
+	end)
+end
+
 local function refreshPlayerList()
 	for _, child in ipairs(listFrame:GetChildren()) do
 		if child:IsA("TextButton") then child:Destroy() end
@@ -160,13 +212,7 @@ local function refreshPlayerList()
 			bc.CornerRadius = UDim.new(0, 6)
 			bc.Parent = button
 			button.MouseButton1Click:Connect(function()
-				teleportToPlayer(player)
-			end)
-			button.MouseEnter:Connect(function()
-				TweenService:Create(button, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(75, 75, 75)}):Play()
-			end)
-			button.MouseLeave:Connect(function()
-				TweenService:Create(button, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(55, 55, 55)}):Play()
+				showPlayerOptions(button, player)
 			end)
 		end
 	end
@@ -199,16 +245,16 @@ teleportButton.MouseButton1Click:Connect(function()
 	end
 end)
 
-teleportAllButton.MouseButton1Click:Connect(function()
+bringAllButton.MouseButton1Click:Connect(function()
 	for _, player in ipairs(Players:GetPlayers()) do
 		if player ~= LocalPlayer then
-			teleportToPlayer(player)
+			bringPlayer(player)
 			task.wait(0.1)
 		end
 	end
-	teleportAllButton.Text = "Teleported All!"
+	bringAllButton.Text = "Brought all players!!"
 	task.wait(1)
-	teleportAllButton.Text = "Teleport All"
+	bringAllButton.Text = "Bring All"
 end)
 
 local dragging, dragStart, startPos
